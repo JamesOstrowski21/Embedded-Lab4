@@ -1,18 +1,18 @@
 <ASSEMBLER_INFO>
  <VERSION>2.2.8</VERSION>
  <DEVICE>"ATmega328P"</DEVICE>
- <WORKING_DIR>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\Debug</WORKING_DIR>
+ <WORKING_DIR>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\Debug</WORKING_DIR>
  <INCLUDE_PATH>
   <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc</DIR>
   <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
   <DIR></DIR>
  </INCLUDE_PATH>
- <SOURCE_FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</SOURCE_FILE>
+ <SOURCE_FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</SOURCE_FILE>
  <INCLUDED_FILES>
   <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc</FILE>
  </INCLUDED_FILES>
  <OBJECT_FILES>
-  <FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\Debug\Lab 4.obj</FILE>
+  <FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\Debug\Lab 4.obj</FILE>
  </OBJECT_FILES>
  <HEX_FILES>
   <FILE>Lab 4.hex</FILE>
@@ -22,19 +22,23 @@
   <FILE>Lab 4.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <msg1><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>13</LINE></msg1>
-  <msg2><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>14</LINE></msg2>
-  <msg3><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>15</LINE></msg3>
-  <start><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>20</LINE></start>
-  <LCDinit><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>86</LINE></LCDinit>
-  <displayCString><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>62</LINE></displayCString>
-  <Secondline><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>45</LINE></Secondline>
-  <main><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>43</LINE></main>
-  <LCDStrobe><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>79</LINE></LCDStrobe>
-  <delay_ms><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>187</LINE></delay_ms>
-  <L20><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>63</LINE></L20>
-  <delay_mms><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>179</LINE></delay_mms>
-  <loop><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>180</LINE></loop>
-  <wait2><FILE>C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>192</LINE></wait2>
+  <msg1><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>17</LINE></msg1>
+  <msg2><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>18</LINE></msg2>
+  <msg3><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>19</LINE></msg3>
+  <start><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>23</LINE></start>
+  <LCDinit><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>158</LINE></LCDinit>
+  <displayCString><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>134</LINE></displayCString>
+  <Secondline><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>117</LINE></Secondline>
+  <main><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>72</LINE></main>
+  <direction><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>88</LINE></direction>
+  <rtn><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>80</LINE></rtn>
+  <increment><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>96</LINE></increment>
+  <decrement><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>106</LINE></decrement>
+  <LCDStrobe><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>151</LINE></LCDStrobe>
+  <delay_ms><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>259</LINE></delay_ms>
+  <L20><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>135</LINE></L20>
+  <delay_mms><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>251</LINE></delay_mms>
+  <loop><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>252</LINE></loop>
+  <wait2><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>264</LINE></wait2>
  </LABELS>
 </ASSEMBLER_INFO>
