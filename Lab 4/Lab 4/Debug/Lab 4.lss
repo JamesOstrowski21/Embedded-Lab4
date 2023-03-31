@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm Tue Mar 28 20:04:00 2023
+AVRASM ver. 2.2.8  C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm Fri Mar 31 12:30:14 2023
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm(8): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
@@ -1038,274 +1038,149 @@ C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\
                                  
                                  ; ***** END OF FILE ******************************************************
                                  .cseg
-                                 .org 0x00 ; PC points here after reset
+                                 
+                                 ;
+                                 .org 0x0000
+000000 c033                      	rjmp RESET
+                                 
+                                 .org 0x0002				; PCINT0
+000002 c060                      	rjmp INT0_vect
+                                 
+                                 
+                                 .org 0x0034
                                  
                                  .def temp = r18
                                  .def value = r20		; Current value of rpg, used to calc duty cycle
-                                 .def input = r22		; State of the rpg 
-                                 .def prevInput = r21	;		
+                                 .def input = r22		; State of the rpg 	
+                                 .def fanBool = r19		; state of the fan 
+                                 .def curr = r17
+                                 .def update = r24
+                                 ;rjmp RESET
                                  
-000000 4344
-000001 3d20
-000002 0020                      msg1: .db "DC = ", 0x00
-000003 6146
-000004 206e
-000005 203d
-000006 0000                      msg2: .db "Fan = ", 0x00, 0
-000007 2520
-000008 0020                      msg3: .db " % ", 0x00
+                                 RESET:
+000034 94f8                      	cli
+000035 ef2f                      	ldi		temp, LOW(RAMEND)
+000036 bf2d                      	out		SPL, temp
+000037 e028                      	ldi		temp, HIGH(RAMEND)
+000038 bf2e                      	out		SPH, temp
+000039 e031                      	ldi		fanBool, 1			; fans initial state is off
+00003a e080                      	ldi		update, 0
+                                 ;---------------------PIN CONFIGURATION-------------------------
+00003b 2700                      	clr		r16							; reset r16
+00003c e208                      	ldi		r16, (1<<DDB3) | (1<<DDB5)	; set pins 3 and 5 as outputs for the LCD
+00003d b904                      	out		DDRB, r16
+00003e 9820                      	cbi		DDRB, 0
+00003f 9821                      	cbi		DDRB, 1 
+000040 9822                      	cbi		DDRB, 2
+000041 9a24                      	sbi		DDRB, 4
+000042 e124                      	ldi		temp, (1<<PB2) | (1<<PB4)
+000043 b925                      	out		PORTB, temp					; enable pullup for pinb 2
+000044 e024                      	ldi		temp, (1<<PD2)
+000045 b92b                      	out		PORTD, temp
+000046 e028                      	ldi		temp, (1<<PD3)
+000047 b92a                      	out		DDRD, temp					; enable OCRB output 
+                                 	
+                                 ;--------------------Setup pin interrupts------------------------	
+                                 	// PCINT0-1 - RPG interrupts
+                                 	// PCINT2	- PB  interrupt
+000048 e021                      	ldi		temp, (1<<INT0)
+000049 bb2d                      	out		EIMSK, temp
+00004a e022                      	ldi		temp, 0x02
+00004b 9320 0069                 	sts		EICRA, temp
                                  
-000009 c000                      rjmp start
-                                 
-                                 start:
-00000a ef2f                      	ldi		temp, LOW(RAMEND)
-00000b bf2d                      	out		SPL, temp
-00000c e028                      	ldi		temp, HIGH(RAMEND)
-00000d bf2e                      	out		SPH, temp
                                  ;--------------- Initialize Timer/Counter for fast PWM mode --------------
-00000e e027                      	ldi temp, (1<<OCIE2A)| (1<<OCIE2B) | (1 << TOIE2)	; enable TC2 interrupts 
-00000f 9320 0070                 	sts TIMSK2, temp
+00004d e223                      	ldi		temp,  (1<<COM2B1) |(1<<WGM21) | (1<<WGM20)
+00004e 9320 00b0                 	sts		TCCR2A, temp								; set to fast non-inverting PWM mode with OC2A as TOP
                                  
-000011 e223                      	ldi temp,  (1<<COM2B1) |(1<<WGM21) | (1<<WGM20)
-000012 9320 00b0                 	sts TCCR2A, temp								; set to fast non-inverting PWM mode with OC2A as TOP
+000050 e029                      	ldi		temp,  (1 << WGM22) |(1 << CS20) 
+000051 9320 00b1                 	sts		TCCR2B, temp								; set the OC2RA as TOP and 1-prescaling
                                  
-000014 e029                      	ldi temp,  (1 << WGM22) |(1 << CS20) 
-000015 9320 00b1                 	sts TCCR2B, temp								; set the OC2RA as TOP and 1-prescaling
-                                 
-000017 ec28                      	ldi temp, 200									; top value, this allows 0-199 steps in duty cycle. or 200 total steps 
-000018 9320 00b3                 	sts OCR2A, temp			
+000053 ec28                      	ldi		temp, 200									; top value, this allows 0-199 steps in duty cycle. or 200 total steps 
+000054 9320 00b3                 	sts		OCR2A, temp			
                                  			
-00001a e040                      	ldi value, 0									; Set the starting duty cycle to 0
-00001b 2f24                      	mov temp, value
-00001c 9320 00b4                 	sts OCR2B, temp
+000056 e14e                      	ldi		value, 30									; Set the starting duty cycle
+000057 2f24                      	mov		temp, value
+000058 9320 00b4                 	sts		OCR2B, temp
+                                 
+                                 	;ldi		temp, (1<<OCIE2A)| (1<<OCIE2B) | (1 << TOIE2)	; enable T/C2 interrupts 
+                                 	;sts		TIMSK2, temp
+                                 ;--------------Enable T/C0 for delays-------------------------------------
+00005a e023                      	ldi		temp, (1<<CS01) | (1<<CS00)
+00005b bd25                      	out		TCCR0B, temp	; Timer clock = system clock / 64
+00005c e021                      	ldi		temp, (1 << TOV0)
+00005d bb25                      	out		TIFR0, temp		; CLear TOV0 / clear pending interrupts 
+                                 	;ldi		temp, (1 << TOIE0)
+                                 	;sts		TIMSK0, temp
+                                 
+                                 
+                                 
+00005e 9478                      sei
+                                 main: 
+00005f 0000                      	nop
+000060 3081                      	cpi	update, 1
+000061 f041                      	breq ToggleFan 
+000062 cffc                      	rjmp main
+                                 
+                                 INT0_vect: 
+000063 e32f                      	ldi		temp, SREG		; save state of SREG
+000064 932f                      	push	temp
+000065 94f8                      	cli 
+                                 
+000066 e081                      	ldi		update, 0x01
+                                 
+000067 e021                      	ldi		temp, 0x01
+000068 2732                      	eor		fanBool, temp
+                                 
+000069 c025                      	rjmp	intDONE			 
+                                 
+                                 ToggleFan:
+00006a 94f8                      	cli
+00006b e080                      	ldi update, 0
+00006c 3031                      	cpi fanBool, 1 
+00006d f079                      	breq turnFanOn
+00006e 3030                      	cpi fanbool, 0
+00006f f019                      	breq turnFanOff
+000070 9478                      	sei
+000071 940c 005f                 	jmp main
+                                 
+                                 turnFanOff:
+000073 982c                      	cbi		PORTB, PB4 
+000074 e020                      	ldi		temp, 0
                                  	
-00001e e028                      	ldi temp, (1<<PD3)
-00001f b92a                      	out DDRD, temp			;	 enable OCRB output 
+000075 9320 00b4                 	sts		OCR2B, temp		
+000077 2722                      	clr		temp
+000078 e020                      	ldi		temp, 0x00		; turn RPG interrupts off. Keep button interrupts
+000079 9320 006b                 	sts		PCMSK0, temp
+00007b 9478                      	sei
+00007c cfe2                      	rjmp	main
                                  
-000020 e023                      	ldi		temp, (1<<CS01) | (1<<CS00)
-000021 bd25                      	out		TCCR0B, temp	; Timer clock = system clock / 64
-000022 e021                      	ldi		temp, 1 << TOV0
-000023 bb25                      	out		TIFR0, temp		; CLear TOV0 / clear pending interrupts 
-000024 e021                      	ldi		temp, 1 << TOIE0
-000025 9320 006e                 	sts		TIMSK0, temp
+                                 turnFanOn: 
+00007d 9a2c                      	sbi		PORTB, PB4
+                                 
+00007e e023                      	ldi		temp, 0x03		; turn RPG control back on
+00007f 9320 006b                 	sts		PCMSK0, temp
+                                 
+                                 
+000081 3342                      	cpi		value, 50		; check if DC > 25%
+000082 d002                      	rcall	rampUp
+000083 9478                      	sei
+000084 cfda                      	rjmp	main
+                                 
+                                 rampUp: 
+000085 ec28                      	ldi		temp, 200		; ramp fan up to 25% DC 
+000086 9320 00b4                 	sts		OCR2B, temp		
+000088 0000                      	nop
+000089 0000                      	nop
+00008a 0000                      	nop
+00008b 9340 00b4                 	sts		OCR2B, value		; bring fan speed back to previous state	
                                  	
-                                 		
-000027 d052                          rcall LCDinit
-000028 9a2d                      	sbi PORTB, PB5
-000029 e085                      	ldi r24, 5
-00002a e0e0                      	ldi r30,LOW(2*msg1) ; Load Z register low
-00002b e0f0                          ldi r31,HIGH(2*msg1) ; Load Z register high
-00002c d03b                          rcall displayCString
-00002d e083                      	ldi r24, 3
-00002e e0ee                      	ldi r30,LOW(2*msg3) ; Load Z register low
-00002f e0f0                          ldi r31,HIGH(2*msg3) ; Load Z register high
-000030 d037                          rcall displayCString
-000031 d027                      	rcall Secondline
-000032 e086                      	ldi r24, 6
-000033 e0e6                      	ldi r30,LOW(2*msg2) ; Load Z register low
-000034 e0f0                          ldi r31,HIGH(2*msg2) ; Load Z register high
-000035 d032                      	rcall displayCString
+00008d 9478                      	sei
+00008e 9508                      	ret
                                  
-                                 main:
-000036 b163                      	in		input, PINB
-000037 7062                      	andi	input, 0x02
-000038 3062                      	cpi		input, 0x02
-000039 b163                      	in		input, PINB			; load in current state of RPG
-00003a 7061                      	andi	input, 0x01			; extract new input values 
-00003b 1756                      	cp		prevInput, input	 
-00003c f431                      	brne	direction			; if the current current state is not the same, determine the direction
-                                 	rtn: 
-00003d 2f56                      		mov		prevInput, input	; store current value of input, in previnput for next iteration 
-00003e b163                      		in		input, pinb			
-00003f 7063                      		andi 	input, 0x03	
-000040 3063                      		cpi		input, 0x03			; check if the RPG is back at a non moving state
-000041 f7d9                      		brne	rtn					; if not, stay in rtn until true 
-000042 cff3                      		rjmp	main	
-                                 
-                                 direction: 
-000043 b123                      	in		temp, PINB
-000044 7022                      	andi	temp, 0x02
-000045 9526                      	lsr		temp
-000046 1762                      	cp		input, temp		; compares previous pin A state to current pin B state. 
-000047 f009                      	breq	increment 		; if the states are equal, RPG is moving CW; Increment
-000048 c008                      	rjmp	decrement 		; else states are not equal, RPG is moving CCW; Decrement
-                                 
-                                 increment: 
-000049 3c48                      	cpi		value, 200			; if the value is 16, we have reached the max value that can be displayed do nothing
-00004a f391                      	breq	rtn					
-00004b e02a                      	ldi		temp, 10
-00004c 0f42                      	add		value, temp
-00004d 9340 00b4                 	sts		OCR2B, value
-                                 	
-00004f 2f52                      	mov		prevInput, temp		; store current input in prev input for next iteration 
-000050 cfec                      	rjmp	rtn
-                                 
-                                 decrement:
-000051 3040                      	cpi		value, 0x00
-000052 f351                      	breq	rtn					; if value has reached 0, do not allow shift reg to change states
-                                 	; ----------------
-000053 e02a                      	ldi		temp, 10
-000054 1b42                      	sub		value, temp
-000055 9340 00b4                 	sts		OCR2B, value
-                                 
-000057 2f52                      	mov		prevInput, temp		; store current input in prev input for next iteration 
-000058 cfe4                      	rjmp	rtn
-                                 
-                                 Secondline:
-000059 982d                      	cbi PORTB, PB5
-00005a e01c                      	ldi r17, 0x0C
-00005b b918                      	out PORTC, r17
-00005c 0000                      	nop
-00005d d017                      	rcall LCDStrobe
-00005e d071                      	rcall delay_ms
-00005f d070                      	rcall delay_ms
-000060 e010                      	ldi r17, 0x00
-000061 b918                      	out PORTC, r17
-000062 0000                      	nop
-000063 d011                      	rcall LCDStrobe
-000064 d06b                      	rcall delay_ms
-000065 d06a                      	rcall delay_ms
-000066 9a2d                      	sbi PORTB, PB5
-000067 9508                      	ret
-                                 
-                                 displayCString:
-                                 L20:
-000068 95c8                      	lpm ; r0 <-- first byte
-000069 9402                      	swap r0 ; Upper nibble in place
-00006a b808                      	out PORTC,r0 ; Send upper nibble out
-00006b d009                      	rcall LCDStrobe ; Latch nibble
-00006c d063                      	rcall delay_ms ; Wait
-00006d 9402                      	swap r0 ; Lower nibble in place
-00006e b808                      	out PORTC,r0 ; Send lower nibble out
-00006f d005                      	rcall LCDStrobe ; Latch nibble
-000070 d05f                      	rcall delay_ms ; Wait
-000071 9631                      	adiw zh:zl,1 ; Increment Z pointer
-000072 958a                      	dec r24 ; Repeat until
-000073 f7a1                      	brne L20 ; all characters are out
-000074 9508                      	ret
-                                 
-                                 
-                                 LCDStrobe:
-000075 9a2b                      	sbi PORTB, PB3
-000076 d059                      	rcall delay_ms
-000077 d058                      	rcall delay_ms
-000078 982b                      	cbi PORTB, PB3
-000079 9508                      	ret
-                                 
-                                 LCDinit:
-00007a e208                      	ldi r16, 0x28 ;all 1s in B
-00007b b904                      	out DDRB, r16
-                                 
-00007c ef0f                      	ldi r16, 0xFF ;all 1s in C
-00007d b907                      	out DDRC, r16
-                                 
-00007e e605                      	ldi r16, 0x65 ;100 ms
-00007f d04c                      	rcall delay_mms
-                                 
-000080 e013                      	ldi r17, 0x03 ;8 bit mode 
-000081 b918                      	out PORTC, r17
-000082 dff2                      	rcall LCDStrobe
-000083 e005                      	ldi r16, 5 ; 
-000084 d047                      	rcall delay_mms;8 bit mode, DB3 and DB2 high
-000085 b918                      	out PORTC, r17
-000086 dfee                      	rcall LCDStrobe;pulse enable to change mode
-000087 e001                      	ldi r16, 1 ; >200us
-000088 d043                      	rcall delay_mms;8 bit mode, DB3 and DB2 high
-000089 b918                      	out PORTC, r17
-00008a dfea                      	rcall LCDStrobe;pulse enable to change mode
-00008b e006                      	ldi r16, 6 ; >200us
-00008c d03f                      	rcall delay_mms
-                                 	
-                                 
-00008d e012                      	ldi r17, 0x02 ; 4 bit mode
-00008e b918                      	out PORTC, r17
-00008f 0000                      	nop
-000090 dfe4                      	rcall LCDStrobe
-000091 e006                      	ldi r16, 6
-000092 d039                      	rcall delay_mms
-                                 
-000093 e012                      	ldi r17, 0x02
-000094 b918                      	out PORTC, r17
-000095 0000                      	nop
-000096 dfde                      	rcall LCDStrobe
-000097 d038                      	rcall delay_ms
-000098 d037                      	rcall delay_ms
-000099 e018                      	ldi r17, 0x08
-00009a b918                      	out PORTC, r17
-00009b 0000                      	nop
-00009c dfd8                      	rcall LCDStrobe
-00009d d032                      	rcall delay_ms
-00009e d031                      	rcall delay_ms
-                                 
-00009f e010                      	ldi r17, 0x00
-0000a0 b918                      	out PORTC, r17
-0000a1 0000                      	nop
-0000a2 dfd2                      	rcall LCDStrobe
-0000a3 d02c                      	rcall delay_ms
-0000a4 d02b                      	rcall delay_ms
-0000a5 e018                      	ldi r17, 0x08
-0000a6 b918                      	out PORTC, r17
-0000a7 0000                      	nop
-0000a8 dfcc                      	rcall LCDStrobe
-0000a9 d026                      	rcall delay_ms
-0000aa d025                      	rcall delay_ms
-                                 
-0000ab e010                      	ldi r17, 0x00
-0000ac b918                      	out PORTC, r17
-0000ad 0000                      	nop
-0000ae dfc6                      	rcall LCDStrobe
-0000af d020                      	rcall delay_ms
-0000b0 d01f                      	rcall delay_ms
-0000b1 e011                      	ldi r17, 0x01
-0000b2 b918                      	out PORTC, r17
-0000b3 0000                      	nop
-0000b4 dfc0                      	rcall LCDStrobe
-0000b5 d01a                      	rcall delay_ms
-0000b6 d019                      	rcall delay_ms
-                                 
-0000b7 e010                      	ldi r17, 0x00
-0000b8 b918                      	out PORTC, r17
-0000b9 0000                      	nop
-0000ba dfba                      	rcall LCDStrobe
-0000bb d014                      	rcall delay_ms
-0000bc e016                      	ldi r17, 0x06
-0000bd b918                      	out PORTC, r17
-0000be 0000                      	nop
-0000bf dfb5                      	rcall LCDStrobe
-0000c0 d00f                      	rcall delay_ms
-                                 
-0000c1 e010                      	ldi r17, 0x00
-0000c2 b918                      	out PORTC, r17
-0000c3 0000                      	nop
-0000c4 dfb0                      	rcall LCDStrobe
-0000c5 d00a                      	rcall delay_ms
-0000c6 e01c                      	ldi r17, 0x0C
-0000c7 b918                      	out PORTC, r17
-0000c8 0000                      	nop
-0000c9 dfab                      	rcall LCDStrobe
-0000ca d005                      	rcall delay_ms
-0000cb 9508                      	ret
-                                 delay_mms:
-                                 	loop:
-0000cc d003                      		rcall delay_ms
-0000cd 950a                      		dec r16
-0000ce f7e9                      		brne loop
-0000cf 9508                      	ret
-                                 
-                                 
-                                 delay_ms:
-0000d0 932f                      		push	temp				
-0000d1 e026                      		ldi		temp, 6
-0000d2 bd26                      		out		TCNT0, temp
-0000d3 2722                      		clr		temp
-                                 		wait2: 
-0000d4 b526                      			in		temp, TCNT0
-0000d5 3020                      			cpi		temp, 0x00		; has the overflow bit been set
-0000d6 f7e9                      			brne	wait2			; if not wait. 
-                                 
-0000d7 912f                      		pop		temp
-0000d8 9508                      	    ret
-                                 	
+                                 intDONE:
+00008f 912f                      	pop temp
+000090 bf2f                      	out SREG, temp	; return the state of the SREG
+000091 9478                      	sei 
 
 
 RESOURCE USE INFORMATION
@@ -1323,39 +1198,39 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega328P" register use summary:
-x  :   0 y  :   0 z  :   0 r0 :   4 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  10 r17:  30 r18:  39 r19:   0 r20:   8 
-r21:   4 r22:  11 r23:   0 r24:   4 r25:   0 r26:   0 r27:   0 r28:   0 
-r29:   0 r30:   4 r31:   4 
-Registers used: 10 out of 35 (28.6%)
+r13:   0 r14:   0 r15:   0 r16:   3 r17:   0 r18:  41 r19:   4 r20:   4 
+r21:   0 r22:   0 r23:   0 r24:   4 r25:   0 r26:   0 r27:   0 r28:   0 
+r29:   0 r30:   0 r31:   0 
+Registers used: 5 out of 35 (14.3%)
 
 "ATmega328P" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   0 add   :   1 adiw  :   1 and   :   0 
-andi  :   4 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+.lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
+andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
 brcc  :   0 brcs  :   0 break :   0 breq  :   3 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   5 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   2 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   1 cls   :   0 
-clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   2 cpc   :   0 
-cpi   :   5 cpse  :   0 dec   :   2 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   5 inc   :   0 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :  44 lds   :   0 lpm   :   3 lsl   :   0 
-lsr   :   1 mov   :   4 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :  13 or    :   0 ori   :   0 out   :  26 pop   :   1 
-push  :   1 rcall :  53 ret   :   6 reti  :   0 rjmp  :   5 rol   :   0 
-ror   :   0 sbc   :   0 sbci  :   0 sbi   :   3 sbic  :   0 sbis  :   0 
+brne  :   0 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   4 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   3 cln   :   0 clr   :   2 cls   :   0 
+clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
+cpi   :   4 cpse  :   0 dec   :   0 eor   :   1 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   0 jmp   :   1 
+ld    :   0 ldd   :   0 ldi   :  24 lds   :   0 lpm   :   0 lsl   :   0 
+lsr   :   0 mov   :   1 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   4 or    :   0 ori   :   0 out   :  10 pop   :   1 
+push  :   1 rcall :   1 ret   :   1 reti  :   1 rjmp  :   6 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   2 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
-sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   8 
-sub   :   1 subi  :   0 swap  :   2 tst   :   0 wdr   :   0 
-Instructions used: 26 out of 113 (23.0%)
+sei   :   6 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :  10 
+sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
+Instructions used: 20 out of 113 (17.7%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0001b2    416     18    434   32768   1.3%
+[.cseg] 0x000000 0x000126    194      0    194   32768   0.6%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm Tue Mar 28 20:04:00 2023
+AVRASM ver. 2.2.8  C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm Fri Mar 31 12:30:14 2023
 
 
 EQU  SIGNATURE_000 0000001e
@@ -695,25 +695,17 @@ EQU  ACIaddr      0000002e
 EQU  TWIaddr      00000030
 EQU  SPMRaddr     00000032
 EQU  INT_VECTORS_SIZE 00000034
+CSEG RESET        00000034
+CSEG INT0_vect    00000063
 DEF  temp         r18
 DEF  value        r20
 DEF  input        r22
-DEF  prevInput    r21
-CSEG msg1         00000000
-CSEG msg2         00000003
-CSEG msg3         00000007
-CSEG start        0000000a
-CSEG LCDinit      0000007a
-CSEG displayCString 00000068
-CSEG Secondline   00000059
-CSEG main         00000036
-CSEG direction    00000043
-CSEG rtn          0000003d
-CSEG increment    00000049
-CSEG decrement    00000051
-CSEG LCDStrobe    00000075
-CSEG delay_ms     000000d0
-CSEG L20          00000068
-CSEG delay_mms    000000cc
-CSEG loop         000000cc
-CSEG wait2        000000d4
+DEF  fanBool      r19
+DEF  curr         r17
+DEF  update       r24
+CSEG main         0000005f
+CSEG ToggleFan    0000006a
+CSEG intDONE      0000008f
+CSEG turnFanOn    0000007d
+CSEG turnFanOff   00000073
+CSEG rampUp       00000085

@@ -22,23 +22,13 @@
   <FILE>Lab 4.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <msg1><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>17</LINE></msg1>
-  <msg2><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>18</LINE></msg2>
-  <msg3><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>19</LINE></msg3>
-  <start><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>23</LINE></start>
-  <LCDinit><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>158</LINE></LCDinit>
-  <displayCString><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>134</LINE></displayCString>
-  <Secondline><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>117</LINE></Secondline>
-  <main><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>72</LINE></main>
-  <direction><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>88</LINE></direction>
-  <rtn><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>80</LINE></rtn>
-  <increment><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>96</LINE></increment>
-  <decrement><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>106</LINE></decrement>
-  <LCDStrobe><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>151</LINE></LCDStrobe>
-  <delay_ms><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>259</LINE></delay_ms>
-  <L20><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>135</LINE></L20>
-  <delay_mms><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>251</LINE></delay_mms>
-  <loop><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>252</LINE></loop>
-  <wait2><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>264</LINE></wait2>
+  <RESET><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>29</LINE></RESET>
+  <INT0_vect><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>93</LINE></INT0_vect>
+  <main><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>87</LINE></main>
+  <ToggleFan><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>105</LINE></ToggleFan>
+  <intDONE><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>149</LINE></intDONE>
+  <turnFanOn><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>126</LINE></turnFanOn>
+  <turnFanOff><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>115</LINE></turnFanOff>
+  <rampUp><FILE>C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm</FILE><LINE>138</LINE></rampUp>
  </LABELS>
 </ASSEMBLER_INFO>
