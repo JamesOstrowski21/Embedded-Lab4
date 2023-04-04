@@ -9,15 +9,19 @@
 .cseg
 .org 0x00 ; PC points here after reset
 
+.def	drem8u	=r26		;remainder
+.def	dres8u	=r27		;result
+.def	dd8u	=r27		;dividend
+.def	dv8u	=r28		;divisor
 .def temp = r18
 .def value = r20		; Current value of rpg, used to calc duty cycle
 .def input = r22		; State of the rpg 
 .def prevInput = r21	;		
 
 msg1: .db "DC = ", 0x00
-msg2: .db "Fan = ", 0x00, 0
-msg3: .db " % ", 0x00
-
+msg2: .db "Fan = ON", 0x00, 0
+msg3: .db "Fan = OFF", 0x00
+msg4: .db " % ", 0x00
 rjmp start
 
 start:
@@ -54,20 +58,6 @@ start:
 	
 		
     rcall LCDinit
-	sbi PORTB, PB5
-	ldi r24, 5
-	ldi r30,LOW(2*msg1) ; Load Z register low
-    ldi r31,HIGH(2*msg1) ; Load Z register high
-    rcall displayCString
-	ldi r24, 3
-	ldi r30,LOW(2*msg3) ; Load Z register low
-    ldi r31,HIGH(2*msg3) ; Load Z register high
-    rcall displayCString
-	rcall Secondline
-	ldi r24, 6
-	ldi r30,LOW(2*msg2) ; Load Z register low
-    ldi r31,HIGH(2*msg2) ; Load Z register high
-	rcall displayCString
 
 main:
 	in		input, PINB
@@ -114,6 +104,51 @@ decrement:
 	mov		prevInput, temp		; store current input in prev input for next iteration 
 	rjmp	rtn
 
+updateDC:
+	sbi PORTB, PB5
+	ldi r24, 5
+	ldi r30,LOW(2*msg1) ; Load Z register low
+    ldi r31,HIGH(2*msg1) ; Load Z register high
+    rcall displayCString	
+	rcall displayDC
+	ldi r24, 3
+	ldi r30,LOW(2*msg4) ; Load Z register low
+    ldi r31,HIGH(2*msg4) ; Load Z register high
+    rcall displayCString
+	ret
+
+fanON:
+	rcall SecondLine
+	ldi r24, 8
+	ldi r30,LOW(2*msg2) ; Load Z register low
+    ldi r31,HIGH(2*msg2) ; Load Z register high
+	rcall displayCString
+	rcall Firstline
+	ret
+fanOFF:
+	rcall SecondLine
+	ldi r24, 9
+	ldi r30,LOW(2*msg3) ; Load Z register low
+    ldi r31,HIGH(2*msg3) ; Load Z register high
+	rcall displayCString
+	rcall Firstline
+	ret
+
+Firstline:
+	cbi PORTB, PB5
+	ldi r17, 0x02
+	out PORTC, r17
+	nop
+	rcall LCDStrobe
+	rcall delay_ms
+	rcall delay_ms
+	ldi r17, 0x00
+	out PORTC, r17
+	nop
+	rcall LCDStrobe
+	rcall delay_ms
+	rcall delay_ms
+	ret
 Secondline:
 	cbi PORTB, PB5
 	ldi r17, 0x0C
@@ -248,6 +283,137 @@ LCDinit:
 	rcall LCDStrobe
 	rcall delay_ms
 	ret
+
+displayDC:
+
+.dseg 
+	dtxt. .BYTE 4 ;allocation
+.cseg
+	mov dd8u, value
+	
+	ldi dv8u, 2
+	
+	ldi r29, 0x00
+	sts	dtxt+4, r29
+
+	rcall div8u
+	cpi dres8u, 100
+	breq onehundred
+	ldi r29, 0x00
+	sts	dtxt+2, r29
+	ldi dv8u, 10
+	rcall div8u
+	ldi r29, 0x30
+	add drem8u, r29
+	sts dtxt+1, drem8u
+	rcall div8u
+	add drem8u, r29
+	sts dtxt, drem8u
+	rjmp read
+onehundred:
+	ldi r29, 0x00
+	sts dtxt+3, r29
+	sts dtxt+2, 0x30
+	sts dtxt+1, 0x30
+	sts dtxt, 0x31
+
+read:
+	ldi r30, LOW(dtxt)
+	ldi r31, HIGH(dtxt)
+	rcall displayDString
+
+displayDstring:
+	ld r0,Z+
+	tst r0 ; Reached end of message ?
+	breq done_dsd ; Yes => quit
+	swap r0 ; Upper nibble in place
+	out PORTC,r0 ; Send upper nibble out
+	rcall LCDStrobe ; Latch nibble 
+	swap r0 ; Lower nibble in place
+	out PORTC,r0 ; Send lower nibble out
+	rcall LCDStrobe ; Latch nibble
+	rjmp displayDString
+done_dsd:
+	ret
+	
+div8u:	sub	drem8u,drem8u	;clear remainder and carry
+	
+	rol	dd8u		;shift left dividend
+	rol	drem8u		;shift dividend into remainder
+	sub	drem8u,dv8u	;remainder = remainder - divisor
+	brcc	d8u_1		;if result negative
+	add	drem8u,dv8u	;    restore remainder
+	clc			;    clear carry to be shifted into result
+	rjmp	d8u_2		;else
+d8u_1:	sec			;    set carry to be shifted into result
+
+d8u_2:	rol	dd8u		;shift left dividend
+	rol	drem8u		;shift dividend into remainder
+	sub	drem8u,dv8u	;remainder = remainder - divisor
+	brcc	d8u_3		;if result negative
+	add	drem8u,dv8u	;    restore remainder
+	clc			;    clear carry to be shifted into result
+	rjmp	d8u_4		;else
+d8u_3:	sec			;    set carry to be shifted into result
+
+d8u_4:	rol	dd8u		;shift left dividend
+	rol	drem8u		;shift dividend into remainder
+	sub	drem8u,dv8u	;remainder = remainder - divisor
+	brcc	d8u_5		;if result negative
+	add	drem8u,dv8u	;    restore remainder
+	clc			;    clear carry to be shifted into result
+	rjmp	d8u_6		;else
+d8u_5:	sec			;    set carry to be shifted into result
+
+d8u_6:	rol	dd8u		;shift left dividend
+	rol	drem8u		;shift dividend into remainder
+	sub	drem8u,dv8u	;remainder = remainder - divisor
+	brcc	d8u_7		;if result negative
+	add	drem8u,dv8u	;    restore remainder
+	clc			;    clear carry to be shifted into result
+	rjmp	d8u_8		;else
+d8u_7:	sec			;    set carry to be shifted into result
+
+d8u_8:	rol	dd8u		;shift left dividend
+	rol	drem8u		;shift dividend into remainder
+	sub	drem8u,dv8u	;remainder = remainder - divisor
+	brcc	d8u_9		;if result negative
+	add	drem8u,dv8u	;    restore remainder
+	clc			;    clear carry to be shifted into result
+	rjmp	d8u_10		;else
+d8u_9:	sec			;    set carry to be shifted into result
+
+d8u_10:	rol	dd8u		;shift left dividend
+	rol	drem8u		;shift dividend into remainder
+	sub	drem8u,dv8u	;remainder = remainder - divisor
+	brcc	d8u_11		;if result negative
+	add	drem8u,dv8u	;    restore remainder
+	clc			;    clear carry to be shifted into result
+	rjmp	d8u_12		;else
+d8u_11:	sec			;    set carry to be shifted into result
+
+d8u_12:	rol	dd8u		;shift left dividend
+	rol	drem8u		;shift dividend into remainder
+	sub	drem8u,dv8u	;remainder = remainder - divisor
+	brcc	d8u_13		;if result negative
+	add	drem8u,dv8u	;    restore remainder
+	clc			;    clear carry to be shifted into result
+	rjmp	d8u_14		;else
+d8u_13:	sec			;    set carry to be shifted into result
+
+d8u_14:	rol	dd8u		;shift left dividend
+	rol	drem8u		;shift dividend into remainder
+	sub	drem8u,dv8u	;remainder = remainder - divisor
+	brcc	d8u_15		;if result negative
+	add	drem8u,dv8u	;    restore remainder
+	clc			;    clear carry to be shifted into result
+	rjmp	d8u_16		;else
+d8u_15:	sec			;    set carry to be shifted into result
+
+d8u_16:	rol	dd8u		;shift left dividend
+	ret
+
+
 delay_mms:
 	loop:
 		rcall delay_ms
