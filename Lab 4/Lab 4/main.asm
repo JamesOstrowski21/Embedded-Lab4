@@ -50,105 +50,114 @@ RESET:
 	out		SPL, temp
 	ldi		temp, HIGH(RAMEND)
 	out		SPH, temp
+	
 	ldi		fanBool, 0			; fans initial state is off
 	ldi		update, 0
 	clr		prevValue
 	ldi		prevInput, 0x03		; inital state of RPG is 11
-;---------------------PIN CONFIGURATION-------------------------
-	clr		r16							; reset r16
-	ldi		r16, (1<<DDB3) | (1<<DDB5)	; set pins 3 and 5 as outputs for the LCD
+	
+;---------------------PIN CONFIGURATION-------------------------------------
+	clr		r16							
+	ldi		r16, (1<<DDB3) | (1<<DDB4) |(1<<DDB5)		; set pins 3 and 5 as outputs for the LCD
 	out		DDRB, r16
-	cbi		DDRB, 0
-	cbi		DDRB, 1 
-	cbi		DDRB, 2
-	sbi		DDRB, 4
+	
 	ldi		temp, (1<<PB2) | (1<<PB4) | (1<<PB3)
-	out		PORTB, temp					; enable pullup for pinb 2
+	out		PORTB, temp					; enable pullups 				
 	ldi		temp, (1<<PD2)
-	out		PORTD, temp
+	out		PORTD, temp					; enable pullups 
+	
 	ldi		temp, (1<<PD3)
 	out		DDRD, temp					; enable OCRB output 
 	
-;--------------------Setup pin interrupts------------------------	
-	// PCINT0-1 - RPG interrupts
-	// INT0	- PB  interrupt
-	ldi		temp, 0x02		; enable INT0 interrupts
+;-------------------- Setup pin interrupts ---------------------------------
+	// INT0	- PB  interrupt	
+	ldi		temp, (1<<ISCO1)				; enable INT0 interrupts on falling edge
 	sts		EICRA, temp
 
-	ldi		temp, (1<<INT0)	; enables int0 flag. 
+	ldi		temp, (1<<INT0)					; enables int0 flag. 
 	out		EIMSK, temp
-
-
-	ldi		temp, (1<<PCIE0)
+	
+	// PCINT0-1 - RPG interrupts
+	ldi		temp, (1<<PCIE0)				; interrupts on Pin change interrupt 0
 	sts		PCICR, temp
 
-	ldi		temp, (1<<PCINT0) | (1<<PCINT1)
+	ldi		temp, (1<<PCINT0) | (1<<PCINT1)			; enable specific interrupts on PCINT0
 	sts		PCMSK0, temp
 
 ;--------------- Initialize Timer/Counter for fast PWM mode --------------
 	ldi		temp,  (1<<COM2B1) |(1<<WGM21) | (1<<WGM20)
-	sts		TCCR2A, temp								; set to fast non-inverting PWM mode with OC2A as TOP
+	sts		TCCR2A, temp								; set to fast non-inverting PWM mode
 
 	ldi		temp,  (1 << WGM22) |(1 << CS20) 
 	sts		TCCR2B, temp								; set the OC2RA as TOP and 1-prescaling
 
-	ldi		temp, 200									; top value, this allows 0-199 steps in duty cycle. or 200 total steps 
+	ldi		temp, 200								; TOP value, 201 total steps ~79.6KHz freq 
 	sts		OCR2A, temp			
 			
-	ldi		value, 160									; Set the starting duty cycle
+	ldi		value, 0								; Set the starting duty cycle
 	mov		temp, value
 	sts		OCR2B, temp
 
-;--------------Enable T/C0 for delays-------------------------------------
+;-------------- Enable T/C0 for delays -----------------------------------
 	ldi		temp, (1<<CS01) | (1<<CS00)
 	out		TCCR0B, temp	; Timer clock = system clock / 64
 
+;------------------ Initalize the LCD ------------------------------------
 rcall LCDinit
 rcall updateDC
-rcall fanON
+rcall fanOFF
 
 sei
 main: 
-	sbrc	update, 0
+	sbrc	update, 0			; check if an update flag is set. 
 	rjmp	ToggleFan
 	sbrc	update, 1
 	rjmp	incrementDC
 	sbrc	update, 2
 	rjmp	decrementDC
 	
-	rjmp	main
+	rjmp	main				; if not repeat
+;----------------- Interrupt Service Routines ---------------------------
+	
 INT0_vect: 
 	ldi		temp, SREG		; save state of SREG
-	push	temp
+	push		temp
+	
 	cli 
+	
 	ldi		update, 0x01
-
 	ldi		temp, 0x01
-	eor		fanBool, temp
+	eor		fanBool, temp		; flip the state of the fan. if off turn on, if on turn off
 
-	rjmp	intDONE			 
+	rjmp		intDONE	
+	
 TOV0_INT:
 	ldi		temp, SREG		; save state of SREG
-	push	temp
+	push		temp
+	
 	cli 
+	
 	ldi		temp, (1 << TOV0)
-	out		TIFR0, temp		; Clear TOV0 / clear pending interrupts 
-	rjmp	intDONE		
+	out		TIFR0, temp		; Reset TOV0
+	
+	rjmp		intDONE		
 		 
 PCINT0_INT:
 	ldi		temp, SREG		; save state of SREG
-	push	temp
+	push		temp
+	
 	cli
+	
 	in		input, PINB
-	andi	input, 0x03		; mask out PINA and PINB
+	andi		input, 0x03		; mask out PINA and PINB
 
 	inc		rpgInterruptCount
 	cpi		rpgInterruptCount, 1
-	breq	firstTime
+	breq		firstTime
 
-	cpi		rpgInterruptCount, 4 
-	breq	DONE
-	rjmp	intDONE
+	cpi		rpgInterruptCount, 4 	; if the rpg is back at the idle state 
+	breq		DONE
+	rjmp		intDONE
 
 DONE: 
 	;mov		update, tempUpdate
@@ -156,7 +165,7 @@ DONE:
 	rjmp	intDONE
 
 firstTime:
-	cpi		input, 0x01
+	cpi		input, 0x01		; save the inital state change on the pins
 	breq	rpgCW
 	cpi		input, 0x02
 	breq	rpgCCW
@@ -164,55 +173,64 @@ firstTime:
 	rjmp	intDONE
 
 rpgCW: 
-	ldi		update, 0x02
+	ldi		update, 0x02		; if the rpg is moving CW, update bit 2
 	rjmp	intDONE
+	
 rpgCCW: 
-	ldi		update, 0x04
+	ldi		update, 0x04		; if the rpg is moving CCW,update bit 3
 	rjmp	intDONE
+	
+intDONE:
+	pop temp
+	out SREG, temp	; return the state of the SREG
+	sei 
+	reti
+;------------------- main subroutines -----------------
 
 incrementDC:
-	cli
-	clr		update
+	cli					; critial code 
+	clr		update			; reset updates. 
 
-	cpi		value, 200
+	cpi		value, 200		; check if the DC is at its max, if so don't allow more increasing. 
 	breq	incDone
 
 	ldi		temp, 2
-	add		value, temp
+	add		value, temp		; increment DC by 1%
+	
 incDone:
-	sts		OCR2B, value		
+	sts		OCR2B, value	
+	
 	// update DC 
-	cli
 	rcall	updateDC
 	rcall	fanON
-	sei
+	
+	sei					; renable interrupts 
 	rjmp	main
 
 decrementDC:
-	cli
+	cli					; critial code 
 	clr		update
 
-	cpi		value, 0
+	cpi		value, 0		; don't allow DC to decrement past 0. 
 	breq	decDone
 
 	ldi		temp, 2
-	sub		value, temp
+	sub		value, temp		; decrease DC by 1 %
 decDone: 
 	sts		OCR2B, value	
 		
 	// update DC
-	cli 
 	rcall	updateDC
 	rcall	fanON
+	
 	sei
 	rjmp	main
-
-		  
+  
 ToggleFan:
-	clr		update
-	cpi fanBool, 1 
+	clr	update		
+	cpi fanBool, 1 		; if fan needs to turn on.
 	breq turnFanOn
-	cpi fanbool, 0
+	cpi fanbool, 0		; if fan needs to turn off. 
 	breq turnFanOff
 
 	rjmp main
@@ -246,12 +264,6 @@ turnFanOn:
 	sts		PCMSK0, temp
 
 	rjmp	main
-
-intDONE:
-	pop temp
-	out SREG, temp	; return the state of the SREG
-	sei 
-	reti
 
 updateDC:
 	cbi PORTB, PB5 ; Set RS to 0 for command codes
