@@ -254,32 +254,32 @@ intDONE:
 	reti
 
 updateDC:
-	cbi PORTB, PB5
-	ldi r17, 0x00
+	cbi PORTB, PB5 ; Set RS to 0 for command codes
+	ldi r17, 0x00	;upper nibble of 0x01 which clears display
 	out PORTC, r17
 	nop
 	rcall LCDStrobe
 	rcall delay_ms
 
-	ldi r17, 0x01
+	ldi r17, 0x01 ; lower nibble of clear display
 	out PORTC, r17
 	nop
 	rcall LCDStrobe
 	rcall delay_ms
 
-	ldi r17, 0x00
+	ldi r17, 0x00 ; upper nibble of return home
 	out PORTC, r17
 	nop
 	rcall LCDStrobe
 	rcall delay_ms
 
-	ldi r17, 0x02
+	ldi r17, 0x02 ;lower nibble of return home
 	out PORTC, r17
 	nop
 	rcall LCDStrobe
 	rcall delay_ms
 
-	sbi PORTB, PB5
+	sbi PORTB, PB5 ;set RS back to 1 for character display 
 	ldi r24, 5
 	ldi r30,LOW(2*msg1) ; Load Z register low
     ldi r31,HIGH(2*msg1) ; Load Z register high
@@ -297,7 +297,6 @@ fanON:
 	ldi r30,LOW(2*msg2) ; Load Z register low
     ldi r31,HIGH(2*msg2) ; Load Z register high
 	rcall displayCString
-	;rcall Firstline
 	ret
 
 fanOFF:
@@ -306,42 +305,23 @@ fanOFF:
 	ldi r30,LOW(2*msg3) ; Load Z register low
     ldi r31,HIGH(2*msg3) ; Load Z register high
 	rcall displayCString
-	;rcall Firstline
-	ret
-
-Firstline:
-	cbi PORTB, PB5
-	ldi r17, 0x08
-	out PORTC, r17
-	nop
-	rcall LCDStrobe
-	rcall delay_ms
-	rcall delay_ms
-
-	ldi r17, 0x00
-	out PORTC, r17
-	nop
-	rcall LCDStrobe
-	rcall delay_ms
-	rcall delay_ms
-
 	ret
 
 Secondline:
-	cbi PORTB, PB5
-	ldi r17, 0x0C
+	cbi PORTB, PB5 ; set RS to 0 for commands 
+	ldi r17, 0x0C  ; upper nibble to change DDRAM address to 40 (second line)
 	out PORTC, r17
 	nop
 	rcall LCDStrobe
 	rcall delay_ms
 	rcall delay_ms
-	ldi r17, 0x00
+	ldi r17, 0x00 ; lower nibble for second line
 	out PORTC, r17
 	nop
 	rcall LCDStrobe
 	rcall delay_ms
 	rcall delay_ms
-	sbi PORTB, PB5
+	sbi PORTB, PB5 ; set RS back to 1 for characters
 	ret
 
 displayCString:
@@ -369,21 +349,21 @@ LCDStrobe:
 
 displayDC:
 .dseg 
-	dtxt: .BYTE 4 ;allocation
-	twoDigit: .BYTE 3
+	dtxt: .BYTE 4 ;allocation for duty cycle == 100%
+	twoDigit: .BYTE 3 ;allcoation for duty cycle < 100%
 .cseg
-	mov dd8u, value
-	ldi dv8u, 2
-	rcall div8u
+	mov dd8u, value ; load value into dividend
+	ldi dv8u, 2 ; divisor 
+	rcall div8u ; divide value by 2 to get duty cycle 
 
-	cpi dres8u, 100
+	cpi dres8u, 100 ; see if duty cycle is at 100%
 	breq onehundred
 
-	ldi r29, 0x00
+	ldi r29, 0x00 
 	sts	twoDigit+2, r29	; load in terminating null byte
 
 	; ones place
-	ldi dv8u, 10
+	ldi dv8u, 10 
 	rcall div8u			
 	ldi r29, 0x30
 	add drem8u, r29
@@ -395,7 +375,7 @@ displayDC:
 	sts twoDigit, drem8u
 	rjmp read
 
-onehundred:
+onehundred: ; if duty cyle is 100%
 	ldi		r29, 0x00
 	sts		dtxt+3, r29
 	ldi		temp, 0x30
@@ -404,12 +384,12 @@ onehundred:
 	ldi		temp, 0x31
 	sts		dtxt, temp
 
-readhundred:
+readhundred: ;read dseg bytes
 	ldi r30, LOW(dtxt)
 	ldi r31, HIGH(dtxt)
 	rjmp displayDString
 
-read:
+read: ; read dseg bytes for twodigit
 	ldi r30, LOW(twoDigit)
 	ldi r31, HIGH(twoDigit)
 	rjmp displayDString
@@ -461,7 +441,8 @@ LCDinit:
 	ldi r16, 6
 	rcall delay_mms
 
-	ldi r17, 0x02
+	; 4 bit 2 line 
+	ldi r17, 0x02 
 	out PORTC, r17
 	nop
 	rcall LCDStrobe
@@ -474,6 +455,7 @@ LCDinit:
 	rcall delay_ms
 	rcall delay_ms
 
+	;set cursor
 	ldi r17, 0x00
 	out PORTC, r17
 	nop
@@ -487,6 +469,7 @@ LCDinit:
 	rcall delay_ms
 	rcall delay_ms
 
+	;clear display
 	ldi r17, 0x00
 	out PORTC, r17
 	nop
@@ -500,6 +483,7 @@ LCDinit:
 	rcall delay_ms
 	rcall delay_ms
 
+	;set cursor move to right
 	ldi r17, 0x00
 	out PORTC, r17
 	nop
@@ -511,6 +495,7 @@ LCDinit:
 	rcall LCDStrobe
 	rcall delay_ms
 
+	;turn on display 
 	ldi r17, 0x00
 	out PORTC, r17
 	nop

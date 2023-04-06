@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\kaili\OneDrive\Documents\Spring2023\Embedded\Embedded-Lab4\Lab 4\Lab 4\main.asm Tue Apr 04 13:33:21 2023
+AVRASM ver. 2.2.8  C:\Users\epicg\OneDrive - University of Iowa\Spring 2023\Embedded Systems\Lab4\Embedded-Lab4\Lab 4\Lab 4\main.asm Wed Apr 05 19:41:05 2023
 
 
 EQU  SIGNATURE_000 0000001e
@@ -717,7 +717,7 @@ CSEG msg1         00000022
 CSEG msg2         00000025
 CSEG msg3         0000002b
 CSEG msg4         00000030
-CSEG LCDinit      00000155
+CSEG LCDinit      00000147
 CSEG updateDC     000000cb
 CSEG fanON        000000eb
 CSEG main         00000066
@@ -734,37 +734,36 @@ CSEG decDone      000000a3
 CSEG turnFanOn    000000bd
 CSEG turnFanOff   000000b0
 CSEG fanOFF       000000f1
-CSEG LCDStrobe    00000121
-CSEG delay_ms     000001f5
-CSEG displayCString 00000114
-CSEG displayDC    00000126
-CSEG SecondLine   00000105
-CSEG Firstline    000000f7
-CSEG L20          00000114
+CSEG LCDStrobe    00000113
+CSEG delay_ms     000001e7
+CSEG displayCString 00000106
+CSEG displayDC    00000118
+CSEG SecondLine   000000f7
+CSEG L20          00000106
 DSEG dtxt         00000100
 DSEG twoDigit     00000104
-CSEG div8u        000001a7
-CSEG onehundred   00000139
-CSEG read         00000147
-CSEG readhundred  00000144
-CSEG displayDString 0000014a
-CSEG done_dsd     00000154
-CSEG delay_mms    000001ea
-CSEG d8u_1        000001af
-CSEG d8u_2        000001b0
-CSEG d8u_3        000001b7
-CSEG d8u_4        000001b8
-CSEG d8u_5        000001bf
-CSEG d8u_6        000001c0
-CSEG d8u_7        000001c7
-CSEG d8u_8        000001c8
-CSEG d8u_9        000001cf
-CSEG d8u_10       000001d0
-CSEG d8u_11       000001d7
-CSEG d8u_12       000001d8
-CSEG d8u_13       000001df
-CSEG d8u_14       000001e0
-CSEG d8u_15       000001e7
-CSEG d8u_16       000001e8
-CSEG delayLoop    000001ed
-CSEG wait         000001fb
+CSEG div8u        00000199
+CSEG onehundred   0000012b
+CSEG read         00000139
+CSEG readhundred  00000136
+CSEG displayDString 0000013c
+CSEG done_dsd     00000146
+CSEG delay_mms    000001dc
+CSEG d8u_1        000001a1
+CSEG d8u_2        000001a2
+CSEG d8u_3        000001a9
+CSEG d8u_4        000001aa
+CSEG d8u_5        000001b1
+CSEG d8u_6        000001b2
+CSEG d8u_7        000001b9
+CSEG d8u_8        000001ba
+CSEG d8u_9        000001c1
+CSEG d8u_10       000001c2
+CSEG d8u_11       000001c9
+CSEG d8u_12       000001ca
+CSEG d8u_13       000001d1
+CSEG d8u_14       000001d2
+CSEG d8u_15       000001d9
+CSEG d8u_16       000001da
+CSEG delayLoop    000001df
+CSEG wait         000001ed
